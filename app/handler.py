@@ -14,13 +14,13 @@ def hello_reply(message):
                   'Type `help` for assistance')
 
 
-@respond_to('', re.IGNORECASE)
+@respond_to('^(?![\s\S])', re.IGNORECASE)
 def summarize(message):
     print message.body
     attachments = []
     channel = message.body["channel"]
     user_message = ''
-    message.reply("One moment... :bicyclist:")
+    message.reply("One moment...")
 
     if "thread_ts" in message.body:  # mention in thread
         user_message = get_message_by_thread_ts(
@@ -37,7 +37,7 @@ def summarize(message):
 
     if user_message:
         time.sleep(1)
-        message.reply("Fetching article(s)... :dove_of_peace:")
+        message.reply("Fetching article(s)... :bicyclist:")
         links = remove_duplicates_from_list(extract_urls(user_message))
         attachments.extend(make_response(links)) if links else attachments.extend(
             no_links_error_attachment())
