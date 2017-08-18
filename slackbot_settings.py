@@ -1,7 +1,6 @@
-from app.config import API_TOKEN as BOT_TOKEN
+import os
 
-
-API_TOKEN = BOT_TOKEN
+API_TOKEN = os.getenv("SLACK_API_TOKEN")
 ERRORS_TO = 'ryan'
 DEFAULT_REPLY = "Sorry but I didn't understand you."
 PLUGINS = [
