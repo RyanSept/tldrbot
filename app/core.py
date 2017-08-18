@@ -40,6 +40,9 @@ def get_article(article_link, summary_length=5):
 
 
 def make_response(links):
+    """
+    Get the summary and build the attachment
+    """
     color = 0
     fallback = ""
     attachments = []
@@ -70,6 +73,9 @@ def make_response(links):
 
 
 def generate_attachment(text, title, title_link, color, fallback):
+    """
+    Generate response attachment
+    """
     colors = ["#6A2D8A", "#D662A8", "#FFB495", "#E07761"]
     return {
         "fallback": fallback,
@@ -81,6 +87,9 @@ def generate_attachment(text, title, title_link, color, fallback):
 
 
 def no_links_error_attachment():
+    """
+    Generates reply for when no links are found in the message the user tags us
+    """
     text = "Oh no :cry: No links were found in the most recent message."
     return [{
         "fallback": text,
