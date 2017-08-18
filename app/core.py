@@ -1,5 +1,7 @@
 import re
 from app import slack_client, textapi_client
+from newspaper import Article, Config
+from slackbot import settings
 
 
 def get_message_by_thread_ts(channel, thread):
@@ -28,13 +30,13 @@ def remove_duplicates_from_list(alist):
     return list(set(alist))
 
 
-def get_summary(article_link, summary_length=5):
+def get_article(article_link, summary_length=5):
     '''
-    Make call to aylien api
+    Extract article and summarize it
     '''
-    params = {"url": article_link, 'sentences_number': summary_length}
-    summary = textapi_client.Summarize(params)
-    return summary["sentences"]
+    article = Article(article_link)
+    article.build()
+    return article
 
 
 def make_response(links):
@@ -45,15 +47,14 @@ def make_response(links):
         if color > 3:
             color = 0
         link = link.strip("<").strip(">")
-        print link
-        summary = get_summary(link)
-        if summary:
-            summary = "\n".join(summary)
+        article = get_article(link)
+        if article.title:
+            summary = article.summary
             heading = "*Summary for:* {}\n".format(link)
             fallback += heading + summary
 
             attachment = generate_attachment(
-                summary, "Summary - " + link.rsplit("/", 1)[-1],
+                summary, "Summary for: " + article.title,
                 link, color, fallback)
             attachments.append(attachment)
             color += 1
@@ -89,15 +90,20 @@ def no_links_error_attachment():
 
 
 def get_help_message():
+    """Get the help message attachment."""
     return [{
-        "fallback": "Tldrbot (too long; didn't read) allows you to summarize any article into a 5 sentence (1 minute read).\nTo use it, simply mention '@tldr' in a thread on the message containing a link to an article and wait for our team of scholarly elves to magically generate a summary.\n<https://get.slack.help/hc/en-us/articles/115000769927-Message-threads#start-a-thread-to-reply-to-a-message|How to start a thread>",
-        "text": "Tldrbot (too long; didn't read) allows you to summarize any article into a 5 sentence (1 minute read).\n\nTo use it, simply mention '@tldr' in a thread on the message containing a link to an article and wait for our efficient team of scholarly elves to magically generate a summary.\n",
+        "fallback": "Tldrbot (too long; didn't read) summarizes any article into a 5 sentence (~1 minute read).\nTo use it, simply mention <@tldr> in a thread on the message containing a link to an article or direct message <@tldr> the link and wait for our team of scholarly elves to magically generate a summary.\n<https://get.slack.help/hc/en-us/articles/115000769927-Message-threads#start-a-thread-to-reply-to-a-message|How to start a thread>",
+        "text": "Tldrbot (too long; didn't read) summarizes any article into a 5 sentence (~1 minute read).\n\nTo use it, simply mention <@tldr> in a thread on the message containing a link to an article or direct message <@tldr> the link and wait for our efficient team of scholarly elves to magically generate a summary.\n",
         "color": "#19a8e3",
         "mrkdwn": True,
         "fields": [
             {
                 "title": "Glossary",
                 "value": "<https://get.slack.help/hc/en-us/articles/115000769927-Message-threads#start-a-thread-to-reply-to-a-message|How to start a thread>"
+            },
+            {
+                "title": "Report bugs/Send feedback",
+                "value": "Carpe DM <@{}>".format(settings.ERRORS_TO)
             }
         ]
     }]
