@@ -1,5 +1,5 @@
 import re
-from app import slack_client, textapi_client
+from app import slack_client
 from newspaper import Article, Config
 from slackbot import settings
 
